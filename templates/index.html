@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Intrusion Detection System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🛡️ Network Intrusion Detection System</h1>
+                <p class="subtitle">Real-time ML-based Network Traffic Classification</p>
+            </div>
+            <div class="status-indicator">
+                <span id="connection-status" class="status-badge disconnected">Disconnected</span>
+                <span id="monitoring-status" class="status-badge inactive">Monitoring Inactive</span>
+            </div>
+        </header>
+
+        <!-- Control Panel -->
+        <section class="control-panel">
+            <div class="card">
+                <h2>Control Panel</h2>
+                <div class="controls">
+                    <button id="start-btn" class="btn btn-primary">
+                        <span class="btn-icon">▶</span> Start Monitoring
+                    </button>
+                    <button id="stop-btn" class="btn btn-danger" disabled>
+                        <span class="btn-icon">⏹</span> Stop Monitoring
+                    </button>
+                    <button id="refresh-btn" class="btn btn-secondary">
+                        <span class="btn-icon">🔄</span> Refresh Stats
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics Dashboard -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <h3>Total Packets</h3>
+                    <p class="stat-value" id="total-packets">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <h3>Normal Traffic</h3>
+                    <p class="stat-value" id="normal-traffic">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🚨</div>
+                <div class="stat-content">
+                    <h3>Attacks Detected</h3>
+                    <p class="stat-value" id="attacks-detected">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-content">
+                    <h3>Attack Rate</h3>
+                    <p class="stat-value" id="attack-rate">0%</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <div class="card chart-card">
+                <h2>Traffic Classification</h2>
+                <canvas id="traffic-chart"></canvas>
+            </div>
+            <div class="card chart-card">
+                <h2>Attack Distribution</h2>
+                <canvas id="attack-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Alerts Section -->
+        <section class="alerts-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>🚨 Recent Alerts</h2>
+                    <span id="alert-count" class="badge">0</span>
+                </div>
+                <div id="alerts-container" class="alerts-container">
+                    <p class="no-alerts">No alerts detected yet. System is monitoring...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Traffic Feed -->
+        <section class="traffic-feed">
+            <div class="card">
+                <h2>📡 Live Traffic Feed</h2>
+                <div id="traffic-feed-container" class="feed-container">
+                    <p class="no-data">Waiting for traffic data...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Network Intrusion Detection System | ML-based Traffic Classification</p>
+            <p>Powered by Random Forest & XGBoost | Real-time Packet Analysis</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
