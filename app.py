@@ -217,6 +217,43 @@ def get_traffic():
     events.reverse()   # newest first
     return jsonify(events)
 
+@app.route('/debug/simulate_attack')
+@login_required
+def simulate_attack():
+    """Simulated alert for testing dashboard UI"""
+    test_prediction = 'DoS'
+    conf_f = 0.95
+    src_str = '192.168.1.100:443'
+    dst_str = 'TARGET_SERVER'
+    proto_str = 'TCP/HTTP'
+    
+    attack_alert = {
+        'timestamp':   datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'attack_type': test_prediction.upper(),
+        'confidence':  f'{conf_f*100:.1f}%',
+        'source_ip':   src_str,
+        'dest_ip':     dst_str,
+        'protocol':    proto_str,
+        'severity':    'HIGH'
+    }
+    all_alerts.append(attack_alert)
+    socketio.emit('new_alert', attack_alert)
+    
+    # Also update stats manually for the debug test
+    if detector:
+        detector.total_packets += 1
+        detector.total_attacks += 1
+    
+    socketio.emit('stats_update', {
+        'total_packets':    detector.total_packets if detector else 1,
+        'normal_traffic':   detector.total_normal if detector else 0,
+        'attacks_detected': detector.total_attacks if detector else 1,
+        'attack_rate': (detector.total_attacks / detector.total_packets * 100)
+                       if detector and detector.total_packets > 0 else 100
+    })
+    
+    return jsonify({'success': True, 'message': 'Simulated attack alert sent to dashboard'})
+
 @app.route('/api/hosts')
 def get_known_hosts():
     """
@@ -358,7 +395,7 @@ def run_monitoring():
                     proto_str = f"{protocol}/{str(service).upper()}" if service and str(service) != 'other' else protocol
                     conf_f    = float(confidence)
 
-                    logger.info(f"CLASSIFIED: {prediction} | {conf_f*100:.1f}% | {src_str} -> {dst_str}")
+                    logger.info(f"DETECTED: [{prediction}] | Confidence: {conf_f*100:.1f}% | {src_str} -> {dst_str}")
 
                     # ── Live Traffic Feed (ALL predictions) ───────────────
                     traffic_event = {

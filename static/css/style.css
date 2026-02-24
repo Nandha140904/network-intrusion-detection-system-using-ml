@@ -276,7 +276,16 @@ body {
 }
 
 .chart-card {
-    min-height: 350px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-container {
+    flex-grow: 1;
+    position: relative;
+    height: 300px;
+    width: 100%;
 }
 
 /* Alerts Section */

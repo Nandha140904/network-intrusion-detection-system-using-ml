@@ -57,7 +57,7 @@ function initCharts() {
     attackChart = new Chart(attackCtx, {
         type: 'bar',
         data: {
-            labels: ['DoS', 'Probe', 'R2L', 'U2R'],
+            labels: ['DOS', 'PROBE', 'R2L', 'U2R'],
             datasets: [{
                 label: 'Attack Count',
                 data: [0, 0, 0, 0],
@@ -119,20 +119,26 @@ socket.on('alert_system_update', (alert) => {
     console.log('High-confidence alert:', alert);
 });
 
-// Update Statistics
+// Update Statistics from server-side stats object
 function updateStats(stats) {
+    if (!stats) return;
+
     totalPacketsEl.textContent = stats.total_packets || 0;
     normalTrafficEl.textContent = stats.normal_traffic || 0;
     attacksDetectedEl.textContent = stats.attacks_detected || 0;
     attackRateEl.textContent = (stats.attack_rate || 0).toFixed(2) + '%';
 
-    // Update traffic chart
+    // Also sync the alert count badge with the server's attack count
+    alertCount = stats.attacks_detected || 0;
+    alertCountEl.textContent = alertCount;
+
+    // Update traffic chart (Doughnut)
     if (trafficChart) {
         trafficChart.data.datasets[0].data = [
             stats.normal_traffic || 0,
             stats.attacks_detected || 0
         ];
-        trafficChart.update();
+        trafficChart.update('none'); // Update without animation for smoother live feed
     }
 }
 
@@ -180,14 +186,13 @@ function addTrafficFeedItem(data) {
     }
 }
 
-// Add Alert
+// Add Alert to the UI panel (WITHOUT incrementing count, as count comes from stats)
 function addAlert(alert) {
+    if (!alert) return;
+
     // Remove "no alerts" message
     const noAlerts = alertsContainer.querySelector('.no-alerts');
     if (noAlerts) noAlerts.remove();
-
-    alertCount++;
-    alertCountEl.textContent = alertCount;
 
     const alertItem = document.createElement('div');
     const severity = alert.severity || 'MEDIUM';
@@ -222,18 +227,23 @@ async function fetchAlerts() {
         const data = await response.json();
 
         if (data.alerts && data.alerts.length > 0) {
+            // Only rebuild if the list has changed or is empty
             alertsContainer.innerHTML = '';
-            data.alerts.slice(0, 10).forEach(alert => addAlert(alert));
+            data.alerts.slice(0, 15).forEach(alert => addAlert(alert));
         }
 
-        // Update attack distribution chart
+        // Update attack distribution chart (Bar)
         if (data.stats && data.stats.attack_distribution && attackChart) {
             const dist = data.stats.attack_distribution;
+            console.log('Fetching distribution data:', dist);
+
+            // Map the distribution to the chart labels
+            // We use uppercase because app.py uses prediction.upper()
             attackChart.data.datasets[0].data = [
-                dist.DoS || 0,
-                dist.Probe || 0,
-                dist.R2L || 0,
-                dist.U2R || 0
+                dist.DOS || dist.Dos || 0,
+                dist.PROBE || dist.Probe || 0,
+                dist.R2L || dist.R2l || 0,
+                dist.U2R || dist.U2r || 0
             ];
             attackChart.update();
         }
