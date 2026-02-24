@@ -47,19 +47,23 @@ CROSS_VALIDATION_FOLDS = 5
 RANDOM_STATE = 42
 
 # Real-time Packet Capture
-NETWORK_INTERFACE = 'eth0'  # Change based on your system (use 'ipconfig' on Windows)
-PACKET_BUFFER_SIZE = 100
-FLOW_TIMEOUT = 60  # seconds
-CAPTURE_FILTER = ''  # BPF filter, empty = capture all
+# NETWORK_INTERFACE = None  # None = auto-detect default interface
+NETWORK_INTERFACE = r'\Device\NPF_{7088574F-FC9C-4AD6-AEF3-DAFE3FE3C4C1}'
+PACKET_BUFFER_SIZE = 20   # Process a flow every 20 packets (faster detection)
+FLOW_TIMEOUT = 10          # seconds — flush idle flows quickly
+CAPTURE_FILTER = None# Capture traffic to/from Google
 
 # Alert System
 ALERT_THRESHOLD = 0.7  # Confidence threshold for raising alerts
 ALERT_LOG_FILE = os.path.join(LOGS_DIR, 'alerts.log')
 MAX_ALERTS_DISPLAY = 50
 
+# Known Hosts Tracking
+KNOWN_HOSTS_FILE = os.path.join(LOGS_DIR, 'known_hosts.json')
+
 # Dashboard Configuration (Remote Access Enabled)
 FLASK_HOST = '0.0.0.0'  # Allows remote access from any IP
-FLASK_PORT = 5000
+FLASK_PORT = 14094
 FLASK_DEBUG = True
 UPDATE_INTERVAL = 2  # seconds for real-time updates
 

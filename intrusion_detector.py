@@ -9,6 +9,7 @@ from sklearn.preprocessing import LabelEncoder
 from packet_capture import PacketCapture
 from feature_extractor import FeatureExtractor
 from alert_system import AlertSystem
+from host_tracker import HostTracker
 from utils import setup_logging, load_model
 from config import BEST_MODEL_PATH, SCALER_PATH, ENCODER_PATH, NETWORK_INTERFACE
 
@@ -39,6 +40,7 @@ class IntrusionDetector:
         # Initialize components
         self.feature_extractor = FeatureExtractor()
         self.alert_system = AlertSystem()
+        self.host_tracker = HostTracker()
         self.packet_capture = PacketCapture(
             interface=self.interface,
             packet_callback=None  # We'll process in batches
@@ -155,6 +157,22 @@ class IntrusionDetector:
             # Check for alerts
             self.alert_system.check_and_alert(prediction, confidence, packet_info)
             
+            # Update known hosts
+            src_ip = None
+            if packet_info and 'src_ip' in packet_info:
+                src_ip = packet_info.get('src_ip')
+            elif isinstance(flow_features, dict) and 'src_ip' in flow_features:
+                src_ip = flow_features.get('src_ip')
+            
+            if src_ip and src_ip != 'unknown':
+                is_malicious = (prediction != 'normal')
+                packet_count = flow_features.get('count', 1) if isinstance(flow_features, dict) else 1
+                self.host_tracker.update_host(src_ip, packet_count=packet_count, is_malicious=is_malicious)
+                
+                # Periodically save hosts (e.g. every 100 packets or on stop)
+                if self.total_packets % 100 == 0:
+                     self.host_tracker.save_hosts()
+            
             return prediction, confidence
         
         except Exception as e:
@@ -181,20 +199,28 @@ class IntrusionDetector:
             
             # Monitor and classify traffic periodically
             import time
+            # Monitor and classify traffic periodically
+            import time
             while self.packet_capture.is_capturing:
-                time.sleep(5)  # Process every 5 seconds
+                time.sleep(1)  # Process every 1 second
                 
-                # Get flow features from buffer
-                flow_features = self.packet_capture.get_flow_features()
+                # Get flow features (potentially list of flows)
+                flow_features_list = self.packet_capture.get_flow_features()
                 
-                if flow_features:
-                    # Classify traffic
-                    prediction, confidence = self.classify_traffic(flow_features)
+                # If get_flow_features returns a single dict (legacy), make it a list
+                if isinstance(flow_features_list, dict):
+                    flow_features_list = [flow_features_list]
                     
-                    if prediction:
-                        logger.info(f"Classification: {prediction} (confidence: {confidence:.2%})")
+                if flow_features_list:
+                    for flow_features in flow_features_list:
+                        # Classify traffic
+                        prediction, confidence = self.classify_traffic(flow_features)
+                        
+                        if prediction:
+                            logger.info(f"Classification: {prediction} (confidence: {confidence:.2%})")
             
             logger.info("Monitoring stopped")
+            self.host_tracker.save_hosts()
             self.print_statistics()
         
         except KeyboardInterrupt:

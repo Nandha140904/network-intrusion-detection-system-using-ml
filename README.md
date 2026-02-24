@@ -58,8 +58,8 @@ python app.py
 ```
 
 The dashboard will be available at:
-- **Local access**: http://localhost:5000
-- **Remote access**: http://YOUR_IP_ADDRESS:5000
+- **Local access**: http://localhost:14094
+- **Remote access**: http://YOUR_IP_ADDRESS:14094
 
 **Note**: For real-time packet capture, you need to run with administrator privileges.
 
@@ -147,10 +147,10 @@ The dashboard is configured for remote access. To access from another device:
 
 2. Access the dashboard from any device on the same network:
    ```
-   http://YOUR_IP_ADDRESS:5000
+   http://YOUR_IP_ADDRESS:14094
    ```
 
-3. **Firewall Configuration**: Ensure port 5000 is open in your firewall.
+3. **Firewall Configuration**: Ensure port 14094 is open in your firewall.
 
 ## 🔒 Security Notes
 

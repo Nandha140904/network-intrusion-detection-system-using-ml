@@ -6,6 +6,7 @@ Captures network traffic using Scapy
 from scapy.all import sniff, IP, TCP, UDP, ICMP
 from collections import defaultdict
 import threading
+from threading import Lock
 import time
 from feature_extractor import FeatureExtractor
 from utils import setup_logging
@@ -34,6 +35,10 @@ class PacketCapture:
         self.packet_buffer = []
         self.packet_count = 0
         self.capture_thread = None
+        
+        # Thread-safe queue for processed flows
+        self.flow_queue = []
+        self.lock = Lock()
         
         logger.info(f"PacketCapture initialized on interface: {self.interface}")
     
@@ -136,9 +141,14 @@ class PacketCapture:
         Process the packet buffer and extract flow features
         """
         if not self.packet_buffer:
-            return
+            return None
         
         try:
+            # Process ALL buffered packets into multiple flows if possible, 
+            # OR just return a list containing one flow analysis for the current batch.
+            # For simplicity in this architecture, we will extract features for the whole batch
+            # but return it as a LIST to be compatible with the new loop.
+            
             # Extract flow features from buffer
             flow_features = self.feature_extractor.extract_flow_features(
                 self.packet_buffer,
@@ -147,8 +157,14 @@ class PacketCapture:
             
             # Clear buffer
             self.packet_buffer = []
+
+            # Store in thread-safe queue
+            if flow_features:
+                with self.lock:
+                    self.flow_queue.append(flow_features)
+                return [flow_features]
             
-            return flow_features
+            return []
         
         except Exception as e:
             logger.error(f"Error processing buffer: {e}")
@@ -156,12 +172,22 @@ class PacketCapture:
     
     def get_flow_features(self):
         """
-        Get flow features from current buffer
+        Get flow features from queue and process any remaining in buffer
         
         Returns:
-            Dictionary of flow features
+            List of flow features dictionaries
         """
-        return self._process_buffer()
+        # Process any remaining packets in buffer
+        if self.packet_buffer:
+            self._process_buffer()
+            
+        # Return all flows from the queue
+        with self.lock:
+            if self.flow_queue:
+                flows = list(self.flow_queue)
+                self.flow_queue = []
+                return flows
+            return []
     
     def get_packet_count(self):
         """
@@ -177,6 +203,8 @@ class PacketCapture:
         Reset packet capture state
         """
         self.packet_buffer = []
+        with self.lock:
+            self.flow_queue = []
         self.packet_count = 0
         logger.info("Packet capture state reset")
 

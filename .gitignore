@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Models (Large binary files)
+models/*.pkl
+
+# Data
+data/*.txt
+data/*.csv
+data/*.zip
+
+# Logs and User Data
+logs/*.log
+logs/*.json
+users.json
+
+# IDEs
+.vscode/
+.idea/

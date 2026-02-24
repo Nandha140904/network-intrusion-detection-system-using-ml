@@ -138,6 +138,18 @@ class FeatureExtractor:
             else:
                 duration = 0
             features['duration'] = duration
+
+            # IPs - scan all packets to find the first valid (non-None, non-'unknown') IP
+            src_ip, dst_ip = None, None
+            for p in packets:
+                if not src_ip and p.get('src_ip') and p.get('src_ip') not in (None, 'unknown', ''):
+                    src_ip = p.get('src_ip')
+                if not dst_ip and p.get('dst_ip') and p.get('dst_ip') not in (None, 'unknown', ''):
+                    dst_ip = p.get('dst_ip')
+                if src_ip and dst_ip:
+                    break
+            features['src_ip'] = src_ip or 'unknown'
+            features['dst_ip'] = dst_ip or 'unknown'
             
             # Protocol type (most common)
             protocol_types = [p.get('protocol_type', 'other') for p in packets]

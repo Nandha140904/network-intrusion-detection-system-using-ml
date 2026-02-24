@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -16,9 +18,15 @@
                 <h1>🛡️ Network Intrusion Detection System</h1>
                 <p class="subtitle">Real-time ML-based Network Traffic Classification</p>
             </div>
-            <div class="status-indicator">
-                <span id="connection-status" class="status-badge disconnected">Disconnected</span>
-                <span id="monitoring-status" class="status-badge inactive">Monitoring Inactive</span>
+            <div class="header-right">
+                <div class="status-indicator">
+                    <span id="connection-status" class="status-badge disconnected">Disconnected</span>
+                    <span id="monitoring-status" class="status-badge inactive">Monitoring Inactive</span>
+                </div>
+                <div class="header-actions">
+                    <a href="/" class="btn btn-sm btn-secondary" title="Go to Home">🏠 Home</a>
+                    <a href="/logout" class="btn btn-sm btn-logout" title="Logout">🚪 Logout</a>
+                </div>
             </div>
         </header>
 
@@ -74,13 +82,19 @@
 
         <!-- Charts Section -->
         <section class="charts-section">
-            <div class="card chart-card">
-                <h2>Traffic Classification</h2>
-                <canvas id="traffic-chart"></canvas>
-            </div>
-            <div class="card chart-card">
-                <h2>Attack Distribution</h2>
-                <canvas id="attack-chart"></canvas>
+            <div class="charts-grid">
+                <div class="card chart-card">
+                    <h2>Traffic Classification</h2>
+                    <div class="chart-container">
+                        <canvas id="traffic-chart"></canvas>
+                    </div>
+                </div>
+                <div class="card chart-card">
+                    <h2>Attack Distribution</h2>
+                    <div class="chart-container">
+                        <canvas id="attack-chart"></canvas>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -88,7 +102,7 @@
         <section class="alerts-section">
             <div class="card">
                 <div class="card-header">
-                    <h2>🚨 Recent Alerts</h2>
+                    <h2>Recent Alerts</h2>
                     <span id="alert-count" class="badge">0</span>
                 </div>
                 <div id="alerts-container" class="alerts-container">
@@ -100,9 +114,39 @@
         <!-- Live Traffic Feed -->
         <section class="traffic-feed">
             <div class="card">
-                <h2>📡 Live Traffic Feed</h2>
+                <h2>Live Traffic Feed</h2>
                 <div id="traffic-feed-container" class="feed-container">
                     <p class="no-data">Waiting for traffic data...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Known Hosts Section -->
+        <section class="hosts-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Known Hosts</h2>
+                    <button id="refresh-hosts-btn" class="btn btn-sm btn-secondary">Refresh</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table" id="hosts-table">
+                        <thead>
+                            <tr>
+                                <th>IP Address</th>
+                                <th>Status</th>
+                                <th>Packets</th>
+                                <th>Alerts</th>
+                                <th>First Seen</th>
+                                <th>Last Seen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Hosts will be populated here -->
+                            <tr class="no-data-row">
+                                <td colspan="6">No hosts detected yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -116,4 +160,5 @@
 
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
+
 </html>

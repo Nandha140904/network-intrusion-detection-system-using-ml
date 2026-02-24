@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up — NIDS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --dark: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --grad1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --grad2: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 70% 50% at 20% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 80% 70%, rgba(99, 102, 241, 0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.1;
+            pointer-events: none;
+            animation: float 8s ease-in-out infinite alternate;
+        }
+
+        .orb1 {
+            width: 500px;
+            height: 500px;
+            background: #10b981;
+            top: -100px;
+            left: -100px;
+        }
+
+        .orb2 {
+            width: 400px;
+            height: 400px;
+            background: #6366f1;
+            bottom: -100px;
+            right: -100px;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(0)
+            }
+
+            to {
+                transform: translateY(30px)
+            }
+        }
+
+        .signup-wrapper {
+            width: 100%;
+            max-width: 480px;
+            padding: 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 28px;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+
+        .signup-card {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 44px 40px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .signup-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .signup-logo {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .signup-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .signup-header p {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 13px 16px 13px 44px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #475569;
+        }
+
+        input:focus {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.06);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+        }
+
+        input.error-field {
+            border-color: var(--danger) !important;
+        }
+
+        .toggle-pw {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+
+        .toggle-pw:hover {
+            color: var(--text);
+        }
+
+        /* Password strength indicator */
+        .pw-strength {
+            margin-top: 8px;
+        }
+
+        .pw-strength-bar {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border);
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .pw-strength-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 2px;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .pw-strength-text {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .btn-signup {
+            width: 100%;
+            padding: 14px;
+            background: var(--grad2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+            margin-top: 8px;
+        }
+
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.45);
+        }
+
+        .btn-signup:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 22px 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .login-link {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .login-link a {
+            color: #818cf8;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .login-link a:hover {
+            color: #a5b4fc;
+        }
+
+        /* Flash messages */
+        .flash {
+            padding: 13px 18px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flash-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            animation: shake 0.4s;
+        }
+
+        .flash-success {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #6ee7b7;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0)
+            }
+
+            25% {
+                transform: translateX(-5px)
+            }
+
+            75% {
+                transform: translateX(5px)
+            }
+        }
+
+        /* Requirements checklist */
+        .pw-reqs {
+            margin-top: 6px;
+            display: none;
+        }
+
+        .pw-reqs.visible {
+            display: block;
+        }
+
+        .req {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 4px;
+            transition: color 0.2s;
+        }
+
+        .req.met {
+            color: var(--success);
+        }
+
+        .req-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .req.met .req-dot {
+            background: var(--success);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+
+    <div class="signup-wrapper">
+        <a href="/login" class="back-link">← Back to Login</a>
+
+        <div class="signup-card">
+            <div class="signup-header">
+                <div class="signup-logo">🛡️</div>
+                <h1>Create Account</h1>
+                <p>Register to access the NIDS Dashboard</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for cat, msg in messages %}
+            <div class="flash flash-{{ cat }}">
+                {% if cat == 'error' %}⚠️{% else %}✅{% endif %} {{ msg }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/signup" id="signup-form" novalidate>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="username" name="username" placeholder="Choose a username (min 3 chars)"
+                            value="{{ request.form.get('username', '') }}" required minlength="3"
+                            autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔑</span>
+                        <input type="password" id="password" name="password" placeholder="Create a strong password"
+                            required autocomplete="new-password" oninput="checkStrength(this.value)">
+                        <button type="button" class="toggle-pw" onclick="togglePw('password', 'tw1')"
+                            id="tw1">👁️</button>
+                    </div>
+                    <!-- Strength bar -->
+                    <div class="pw-strength">
+                        <div class="pw-strength-bar">
+                            <div class="pw-strength-fill" id="strength-fill"></div>
+                        </div>
+                        <div class="pw-strength-text" id="strength-text"></div>
+                    </div>
+                    <!-- Requirements -->
+                    <div class="pw-reqs" id="pw-reqs">
+                        <div class="req" id="req-len">
+                            <div class="req-dot"></div>At least 6 characters
+                        </div>
+                        <div class="req" id="req-num">
+                            <div class="req-dot"></div>Contains a number
+                        </div>
+                        <div class="req" id="req-upper">
+                            <div class="req-dot"></div>Contains uppercase letter
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="confirm_password" name="confirm_password"
+                            placeholder="Re-enter your password" required autocomplete="new-password">
+                        <button type="button" class="toggle-pw" onclick="togglePw('confirm_password', 'tw2')"
+                            id="tw2">👁️</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-signup" id="signup-btn">
+                    ✨ Create Account
+                </button>
+            </form>
+
+            <div class="divider">or</div>
+
+            <div class="login-link">
+                Already have an account? <a href="/login">Sign In →</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePw(fieldId, btnId) {
+            const field = document.getElementById(fieldId);
+            const btn = document.getElementById(btnId);
+            field.type = field.type === 'password' ? 'text' : 'password';
+            btn.textContent = field.type === 'password' ? '👁️' : '🙈';
+        }
+
+        function checkStrength(pw) {
+            const fill = document.getElementById('strength-fill');
+            const text = document.getElementById('strength-text');
+            const reqs = document.getElementById('pw-reqs');
+
+            reqs.classList.toggle('visible', pw.length > 0);
+
+            // Check requirements
+            const hasLen = pw.length >= 6;
+            const hasNum = /\d/.test(pw);
+            const hasUpper = /[A-Z]/.test(pw);
+
+            document.getElementById('req-len').classList.toggle('met', hasLen);
+            document.getElementById('req-num').classList.toggle('met', hasNum);
+            document.getElementById('req-upper').classList.toggle('met', hasUpper);
+
+            // Score
+            let score = 0;
+            if (hasLen) score++;
+            if (hasNum) score++;
+            if (hasUpper) score++;
+            if (pw.length >= 10) score++;
+            if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+            const levels = [
+                { pct: 20, color: '#ef4444', label: 'Very Weak' },
+                { pct: 40, color: '#f59e0b', label: 'Weak' },
+                { pct: 60, color: '#eab308', label: 'Fair' },
+                { pct: 80, color: '#10b981', label: 'Strong' },
+                { pct: 100, color: '#059669', label: 'Very Strong' },
+            ];
+            const lvl = levels[Math.min(score, 4)];
+            fill.style.width = pw.length === 0 ? '0%' : lvl.pct + '%';
+            fill.style.background = lvl.color;
+            text.textContent = pw.length === 0 ? '' : lvl.label;
+            text.style.color = lvl.color;
+        }
+
+        document.getElementById('signup-form').addEventListener('submit', function (e) {
+            const pw = document.getElementById('password').value;
+            const cpw = document.getElementById('confirm_password').value;
+            const un = document.getElementById('username').value.trim();
+
+            if (un.length < 3) {
+                e.preventDefault();
+                alert('Username must be at least 3 characters.');
+                return;
+            }
+            if (pw !== cpw) {
+                e.preventDefault();
+                document.getElementById('confirm_password').classList.add('error-field');
+                alert('Passwords do not match!');
+                return;
+            }
+            if (pw.length < 6) {
+                e.preventDefault();
+                alert('Password must be at least 6 characters.');
+                return;
+            }
+            // Show loading state
+            const btn = document.getElementById('signup-btn');
+            btn.textContent = '⏳ Creating account...';
+            btn.disabled = true;
+        });
+    </script>
+</body>
+
+</html>
