@@ -220,13 +220,20 @@ def get_traffic():
 @app.route('/debug/simulate_attack')
 @login_required
 def simulate_attack():
-    """Simulated alert for testing dashboard UI"""
-    test_prediction = 'DoS'
-    conf_f = 0.95
-    src_str = '192.168.1.100:443'
-    dst_str = 'TARGET_SERVER'
-    proto_str = 'TCP/HTTP'
-    
+    """Simulated alert for testing dashboard UI — cycles through all attack types"""
+    import itertools
+    # Use a persistent counter stored in app config
+    ATTACK_TYPES = ['DoS', 'Probe', 'R2L', 'U2R']
+    if not hasattr(app, '_sim_attack_idx'):
+        app._sim_attack_idx = 0
+    test_prediction = ATTACK_TYPES[app._sim_attack_idx % len(ATTACK_TYPES)]
+    app._sim_attack_idx += 1
+
+    conf_f   = 0.90 + (app._sim_attack_idx % 10) * 0.005
+    src_str  = f'192.168.1.{(app._sim_attack_idx % 200) + 10}'
+    dst_str  = f'10.0.0.{(app._sim_attack_idx % 50) + 1}'
+    proto_str = ['TCP/HTTP', 'UDP/DNS', 'TCP/FTP', 'ICMP'][app._sim_attack_idx % 4]
+
     attack_alert = {
         'timestamp':   datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'attack_type': test_prediction.upper(),
@@ -234,25 +241,24 @@ def simulate_attack():
         'source_ip':   src_str,
         'dest_ip':     dst_str,
         'protocol':    proto_str,
-        'severity':    'HIGH'
+        'severity':    'HIGH' if conf_f > 0.85 else 'MEDIUM'
     }
     all_alerts.append(attack_alert)
     socketio.emit('new_alert', attack_alert)
-    
-    # Also update stats manually for the debug test
+
     if detector:
         detector.total_packets += 1
         detector.total_attacks += 1
-    
+
     socketio.emit('stats_update', {
-        'total_packets':    detector.total_packets if detector else 1,
-        'normal_traffic':   detector.total_normal if detector else 0,
-        'attacks_detected': detector.total_attacks if detector else 1,
+        'total_packets':    detector.total_packets if detector else app._sim_attack_idx,
+        'normal_traffic':   detector.total_normal  if detector else 0,
+        'attacks_detected': detector.total_attacks if detector else app._sim_attack_idx,
         'attack_rate': (detector.total_attacks / detector.total_packets * 100)
                        if detector and detector.total_packets > 0 else 100
     })
-    
-    return jsonify({'success': True, 'message': 'Simulated attack alert sent to dashboard'})
+
+    return jsonify({'success': True, 'message': f'Simulated {test_prediction} attack sent to dashboard'})
 
 @app.route('/api/hosts')
 def get_known_hosts():

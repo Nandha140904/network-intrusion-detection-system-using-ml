@@ -120,6 +120,17 @@
             border-radius: 24px;
             padding: 44px 40px;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+            animation: cardSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes cardSlideUp {
+            from { opacity: 0; transform: translateY(50px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50%       { transform: translateY(-6px); }
         }
 
         .login-header {
@@ -127,9 +138,10 @@
             margin-bottom: 36px;
         }
 
-        .login-logo {
-            font-size: 3rem;
-            margin-bottom: 16px;
+        .login-logo img {
+            height: 130px;
+            width: auto;
+            animation: logoFloat 3s ease-in-out infinite;
         }
 
         .login-header h1 {
@@ -172,7 +184,7 @@
         input[type="text"],
         input[type="password"] {
             width: 100%;
-            padding: 14px 16px 14px 46px;
+            padding: 14px 16px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border);
             border-radius: 12px;
@@ -310,7 +322,9 @@
 
         <div class="login-card">
             <div class="login-header">
-                <div class="login-logo">🛡️</div>
+                <div class="login-logo">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="NIDS Logo">
+                </div>
                 <h1>Welcome Back</h1>
                 <p>Sign in to access the NIDS Dashboard</p>
             </div>
@@ -319,9 +333,7 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             {% for cat, msg in messages %}
-            <div class="flash flash-{{ cat }}">
-                {% if cat == 'error' %}⚠️{% else %}✅{% endif %} {{ msg }}
-            </div>
+            <div class="flash flash-{{ cat }}">{{ msg }}</div>
             {% endfor %}
             {% endif %}
             {% endwith %}
@@ -330,7 +342,6 @@
                 <div class="form-group">
                     <label for="username">Username</label>
                     <div class="input-wrap">
-                        <span class="input-icon">👤</span>
                         <input type="text" id="username" name="username" placeholder="Enter your username"
                             value="{{ request.form.get('username', '') }}" required autocomplete="username">
                     </div>
@@ -339,15 +350,14 @@
                 <div class="form-group">
                     <label for="password">Password</label>
                     <div class="input-wrap">
-                        <span class="input-icon">🔑</span>
                         <input type="password" id="password" name="password" placeholder="Enter your password" required
                             autocomplete="current-password">
-                        <button type="button" class="toggle-pw" onclick="togglePw()" id="toggle-btn">👁️</button>
+                        <button type="button" class="toggle-pw" onclick="togglePw()" id="toggle-btn">Show</button>
                     </div>
                 </div>
 
                 <button type="submit" class="btn-login" id="login-btn">
-                    🔐 Sign In to Dashboard
+                    Sign In to Dashboard
                 </button>
             </form>
 
@@ -369,17 +379,17 @@
             const btn = document.getElementById('toggle-btn');
             if (pw.type === 'password') {
                 pw.type = 'text';
-                btn.textContent = '🙈';
+                btn.textContent = 'Hide';
             } else {
                 pw.type = 'password';
-                btn.textContent = '👁️';
+                btn.textContent = 'Show';
             }
         }
 
         // Add loading state on submit
         document.getElementById('login-form').addEventListener('submit', function () {
             const btn = document.getElementById('login-btn');
-            btn.textContent = '⏳ Signing in...';
+            btn.textContent = 'Signing in...';
             btn.disabled = true;
         });
     </script>

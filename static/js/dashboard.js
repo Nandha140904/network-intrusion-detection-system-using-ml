@@ -123,10 +123,20 @@ socket.on('alert_system_update', (alert) => {
 function updateStats(stats) {
     if (!stats) return;
 
-    totalPacketsEl.textContent = stats.total_packets || 0;
-    normalTrafficEl.textContent = stats.normal_traffic || 0;
-    attacksDetectedEl.textContent = stats.attacks_detected || 0;
-    attackRateEl.textContent = (stats.attack_rate || 0).toFixed(2) + '%';
+    // Helper: update value and flash a pop animation if it changed
+    function setVal(el, newVal) {
+        if (el.textContent !== String(newVal)) {
+            el.textContent = newVal;
+            el.classList.remove('pop');
+            void el.offsetWidth; // reflow to restart animation
+            el.classList.add('pop');
+        }
+    }
+
+    setVal(totalPacketsEl,    stats.total_packets   || 0);
+    setVal(normalTrafficEl,   stats.normal_traffic  || 0);
+    setVal(attacksDetectedEl, stats.attacks_detected || 0);
+    setVal(attackRateEl,      (stats.attack_rate || 0).toFixed(2) + '%');
 
     // Also sync the alert count badge with the server's attack count
     alertCount = stats.attacks_detected || 0;
@@ -186,13 +196,12 @@ function addTrafficFeedItem(data) {
     }
 }
 
-// Add Alert to the UI panel (WITHOUT incrementing count, as count comes from stats)
+// Add Alert to the UI panel — shows ONLY the latest alert at a time
 function addAlert(alert) {
     if (!alert) return;
 
-    // Remove "no alerts" message
-    const noAlerts = alertsContainer.querySelector('.no-alerts');
-    if (noAlerts) noAlerts.remove();
+    // Always replace content with just the ONE latest alert
+    alertsContainer.innerHTML = '';
 
     const alertItem = document.createElement('div');
     const severity = alert.severity || 'MEDIUM';
@@ -200,7 +209,7 @@ function addAlert(alert) {
 
     alertItem.innerHTML = `
         <div class="alert-header">
-            <span class="alert-type">🚨 ${alert.attack_type || 'UNKNOWN ATTACK'}</span>
+            <span class="alert-type">${alert.attack_type || 'UNKNOWN ATTACK'}</span>
             <span class="alert-severity badge-${severity.toLowerCase()}">${severity}</span>
             <span class="alert-time">${alert.timestamp}</span>
         </div>
@@ -212,12 +221,7 @@ function addAlert(alert) {
         </div>
     `;
 
-    alertsContainer.insertBefore(alertItem, alertsContainer.firstChild);
-
-    // Keep only last 20 alerts
-    while (alertsContainer.children.length > 20) {
-        alertsContainer.removeChild(alertsContainer.lastChild);
-    }
+    alertsContainer.appendChild(alertItem);
 }
 
 // Fetch and Display Alerts
@@ -329,6 +333,31 @@ async function stopMonitoring() {
     }
 }
 
+// Sync button state from server — called on every page load/refresh
+// This fixes the issue where refreshing the page resets the Stop button
+async function syncMonitoringState() {
+    try {
+        const response = await fetch('/api/status');
+        const data = await response.json();
+
+        if (data.monitoring_active) {
+            isMonitoring = true;
+            monitoringStatus.textContent = 'Monitoring Active';
+            monitoringStatus.className = 'status-badge active';
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+        } else {
+            isMonitoring = false;
+            monitoringStatus.textContent = 'Monitoring Inactive';
+            monitoringStatus.className = 'status-badge inactive';
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+    } catch (error) {
+        console.error('Error syncing monitoring state:', error);
+    }
+}
+
 // Event Listeners
 startBtn.addEventListener('click', startMonitoring);
 stopBtn.addEventListener('click', stopMonitoring);
@@ -341,6 +370,8 @@ refreshBtn.addEventListener('click', () => {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     initCharts();
+    // Sync button state FIRST so Stop button is correctly shown after page refresh
+    syncMonitoringState();
     fetchStats();
     fetchAlerts();
     fetchTrafficFeed();

@@ -5,6 +5,38 @@
     box-sizing: border-box;
 }
 
+/* ── Page Load Animations ── */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(60px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes popIn {
+    0%   { transform: scale(0.85); opacity: 0; }
+    70%  { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes glowPulseRed {
+    0%, 100% { box-shadow: 0 0 12px rgba(239,68,68,0.3); }
+    50%       { box-shadow: 0 0 35px rgba(239,68,68,0.75), 0 0 55px rgba(239,68,68,0.35); }
+}
+@keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+@keyframes floatY {
+    0%, 100% { transform: translateY(0px); }
+    50%      { transform: translateY(-8px); }
+}
+
 :root {
     --primary-color: #6366f1;
     --secondary-color: #8b5cf6;
@@ -47,6 +79,11 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     flex-wrap: wrap;
     gap: 16px;
+    animation: fadeInLeft 0.6s ease both;
+    /* Animated border glow */
+    background: linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+                linear-gradient(135deg, #667eea44, #764ba244, #667eea44) border-box;
+    border: 1px solid transparent;
 }
 
 .header-right {
@@ -75,19 +112,33 @@ body {
 }
 
 
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-title-text {
+    display: flex;
+    flex-direction: column;
+}
+
 .header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    background: var(--gradient-1);
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(270deg, #667eea, #764ba2, #f093fb, #667eea);
+    background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: gradientShift 5s ease infinite;
 }
 
 .subtitle {
     color: var(--text-secondary);
-    margin-top: 8px;
-    font-size: 1.1rem;
+    margin-top: 4px;
+    font-size: 1.05rem;
 }
 
 .status-indicator {
@@ -242,7 +293,13 @@ body {
     align-items: center;
     gap: 20px;
     transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeInUp 0.6s ease both;
 }
+.stat-card:nth-child(1) { animation-delay: 0.10s; }
+.stat-card:nth-child(2) { animation-delay: 0.22s; }
+.stat-card:nth-child(3) { animation-delay: 0.34s; }
+.stat-card:nth-child(4) { animation-delay: 0.46s; }
 
 .stat-card:hover {
     transform: translateY(-4px);
@@ -265,6 +322,10 @@ body {
     font-size: 2rem;
     font-weight: 700;
     color: var(--text-primary);
+    transition: transform 0.3s ease;
+}
+.stat-value.pop {
+    animation: popIn 0.4s ease;
 }
 
 /* Charts Section */
@@ -320,7 +381,7 @@ body {
     padding: 16px;
     margin-bottom: 12px;
     border-radius: 8px;
-    animation: slideIn 0.3s ease;
+    animation: slideInRight 0.4s ease both;
 }
 
 @keyframes slideIn {
@@ -370,7 +431,7 @@ body {
 .alert-item.severity-high {
     background: rgba(239, 68, 68, 0.15);
     border-left: 4px solid var(--danger-color);
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+    animation: glowPulseRed 2.5s infinite, slideInRight 0.4s ease both;
 }
 
 .alert-item.severity-medium {
@@ -432,6 +493,7 @@ body {
     flex-direction: column;
     gap: 6px;
     transition: background 0.2s ease, transform 0.15s ease;
+    animation: fadeInUp 0.35s ease both;
 }
 
 .feed-item:hover {

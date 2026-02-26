@@ -118,28 +118,22 @@ class FeatureExtractor:
     def extract_flow_features(self, packets, flow_timeout=60):
         """
         Extract flow-based features from a sequence of packets
-        
-        Args:
-            packets: List of packet feature dictionaries
-            flow_timeout: Flow timeout in seconds
-        
-        Returns:
-            Dictionary of flow features compatible with NSL-KDD format
+        compatible with NSL-KDD 41-feature format.
         """
         if not packets:
             return self._get_default_nsl_kdd_features()
-        
+
         features = {}
-        
+
         try:
             # Duration
             if len(packets) > 1:
                 duration = packets[-1]['timestamp'] - packets[0]['timestamp']
             else:
                 duration = 0
-            features['duration'] = duration
+            features['duration'] = max(0, duration)
 
-            # IPs - scan all packets to find the first valid (non-None, non-'unknown') IP
+            # IPs
             src_ip, dst_ip = None, None
             for p in packets:
                 if not src_ip and p.get('src_ip') and p.get('src_ip') not in (None, 'unknown', ''):
@@ -150,35 +144,49 @@ class FeatureExtractor:
                     break
             features['src_ip'] = src_ip or 'unknown'
             features['dst_ip'] = dst_ip or 'unknown'
-            
+
             # Protocol type (most common)
             protocol_types = [p.get('protocol_type', 'other') for p in packets]
             features['protocol_type'] = max(set(protocol_types), key=protocol_types.count)
-            
+
             # Service (based on destination port)
             dst_ports = [p.get('dst_port', 0) for p in packets if p.get('dst_port', 0) > 0]
+            src_ports = [p.get('src_port', 0) for p in packets if p.get('src_port', 0) > 0]
             if dst_ports:
                 common_port = max(set(dst_ports), key=dst_ports.count)
                 features['service'] = self._port_to_service(common_port)
             else:
                 features['service'] = 'other'
-            
-            # Flag (simplified)
-            features['flag'] = 'SF'  # Simplified for real-time
-            
+
+            # Flag: use TCP flags to determine connection state
+            tcp_flags_list = [p.get('tcp_flags', 0) for p in packets]
+            syn_count  = sum(1 for f in tcp_flags_list if f & 0x02)   # SYN
+            rst_count  = sum(1 for f in tcp_flags_list if f & 0x04)   # RST
+            fin_count  = sum(1 for f in tcp_flags_list if f & 0x01)   # FIN
+            ack_count  = sum(1 for f in tcp_flags_list if f & 0x10)   # ACK
+            n = len(packets)
+            if rst_count > 0 and ack_count == 0:
+                features['flag'] = 'REJ'
+            elif syn_count > 0 and rst_count > 0:
+                features['flag'] = 'RSTO'
+            elif fin_count > 0 and ack_count > 0:
+                features['flag'] = 'SF'
+            else:
+                features['flag'] = 'S0' if syn_count > 0 else 'SF'
+
             # Bytes transferred
             features['src_bytes'] = sum(p.get('packet_length', 0) for p in packets)
-            features['dst_bytes'] = 0  # Would need bidirectional flow tracking
-            
+            features['dst_bytes'] = 0
+
             # Binary features
             features['land'] = 0
             features['wrong_fragment'] = 0
-            features['urgent'] = 0
-            
-            # Content features
+            features['urgent'] = sum(1 for p in packets if p.get('tcp_flags', 0) & 0x20)
+
+            # Content features (can't be computed from raw packets without deep inspection)
             features['hot'] = 0
             features['num_failed_logins'] = 0
-            features['logged_in'] = 0
+            features['logged_in'] = 1 if features['service'] in ('http', 'ftp', 'ssh', 'telnet') else 0
             features['num_compromised'] = 0
             features['root_shell'] = 0
             features['su_attempted'] = 0
@@ -189,38 +197,44 @@ class FeatureExtractor:
             features['num_outbound_cmds'] = 0
             features['is_host_login'] = 0
             features['is_guest_login'] = 0
-            
-            # Traffic features
-            features['count'] = len(packets)
-            features['srv_count'] = len(packets)  # Simplified
-            
-            # Error rates (simplified)
-            features['serror_rate'] = 0.0
-            features['srv_serror_rate'] = 0.0
-            features['rerror_rate'] = 0.0
-            features['srv_rerror_rate'] = 0.0
-            
-            # Connection rates
-            features['same_srv_rate'] = 1.0
-            features['diff_srv_rate'] = 0.0
-            features['srv_diff_host_rate'] = 0.0
-            
+
+            # Traffic statistical features (key for attack detection)
+            features['count'] = n
+            features['srv_count'] = n
+
+            # SYN error rate: proportion of connections with SYN but no response
+            serror_rate = syn_count / n if n > 0 else 0.0
+            rst_rate    = rst_count / n if n > 0 else 0.0
+            features['serror_rate']      = round(serror_rate, 4)
+            features['srv_serror_rate']  = round(serror_rate, 4)
+            features['rerror_rate']      = round(rst_rate, 4)
+            features['srv_rerror_rate']  = round(rst_rate, 4)
+
+            # Service diversity
+            unique_dst_ports = len(set(dst_ports)) if dst_ports else 1
+            unique_src_ports = len(set(src_ports)) if src_ports else 1
+            same_srv_rate = 1.0 - min(unique_dst_ports / max(n, 1), 1.0)
+            diff_srv_rate = min(unique_dst_ports / max(n, 1), 1.0)
+            features['same_srv_rate']    = round(same_srv_rate, 4)
+            features['diff_srv_rate']    = round(diff_srv_rate, 4)
+            features['srv_diff_host_rate'] = round(unique_src_ports / max(n, 1), 4)
+
             # Host-based features
-            features['dst_host_count'] = len(packets)
-            features['dst_host_srv_count'] = len(packets)
-            features['dst_host_same_srv_rate'] = 1.0
-            features['dst_host_diff_srv_rate'] = 0.0
-            features['dst_host_same_src_port_rate'] = 1.0
-            features['dst_host_srv_diff_host_rate'] = 0.0
-            features['dst_host_serror_rate'] = 0.0
-            features['dst_host_srv_serror_rate'] = 0.0
-            features['dst_host_rerror_rate'] = 0.0
-            features['dst_host_srv_rerror_rate'] = 0.0
-            
+            features['dst_host_count']               = min(n * 2, 255)
+            features['dst_host_srv_count']           = min(n, 255)
+            features['dst_host_same_srv_rate']       = round(same_srv_rate, 4)
+            features['dst_host_diff_srv_rate']       = round(diff_srv_rate, 4)
+            features['dst_host_same_src_port_rate']  = round(1.0 - diff_srv_rate, 4)
+            features['dst_host_srv_diff_host_rate']  = round(unique_src_ports / max(n, 1), 4)
+            features['dst_host_serror_rate']         = round(serror_rate, 4)
+            features['dst_host_srv_serror_rate']     = round(serror_rate, 4)
+            features['dst_host_rerror_rate']         = round(rst_rate, 4)
+            features['dst_host_srv_rerror_rate']     = round(rst_rate, 4)
+
         except Exception as e:
             logger.error(f"Error extracting flow features: {e}")
             features = self._get_default_nsl_kdd_features()
-        
+
         return features
     
     def _port_to_service(self, port):

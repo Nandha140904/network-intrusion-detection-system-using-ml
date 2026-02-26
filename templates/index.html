@@ -15,8 +15,13 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <h1>🛡️ Network Intrusion Detection System</h1>
-                <p class="subtitle">Real-time ML-based Network Traffic Classification</p>
+                <a href="/" style="display:inline-block;">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="NIDS Logo" style="height:90px;width:auto;display:block;">
+                </a>
+                <div class="header-title-text">
+                    <h1>Network Intrusion Detection System</h1>
+                    <p class="subtitle">Real-time ML-based Network Traffic Classification</p>
+                </div>
             </div>
             <div class="header-right">
                 <div class="status-indicator">
@@ -24,8 +29,8 @@
                     <span id="monitoring-status" class="status-badge inactive">Monitoring Inactive</span>
                 </div>
                 <div class="header-actions">
-                    <a href="/" class="btn btn-sm btn-secondary" title="Go to Home">🏠 Home</a>
-                    <a href="/logout" class="btn btn-sm btn-logout" title="Logout">🚪 Logout</a>
+                    <a href="/" class="btn btn-sm btn-secondary" title="Go to Home">Home</a>
+                    <a href="/logout" class="btn btn-sm btn-logout" title="Logout">Logout</a>
                 </div>
             </div>
         </header>
@@ -42,7 +47,7 @@
                         <span class="btn-icon">⏹</span> Stop Monitoring
                     </button>
                     <button id="refresh-btn" class="btn btn-secondary">
-                        <span class="btn-icon">🔄</span> Refresh Stats
+                        <span class="btn-icon">↺</span> Refresh Stats
                     </button>
                 </div>
             </div>
@@ -51,28 +56,24 @@
         <!-- Statistics Dashboard -->
         <section class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon">📊</div>
                 <div class="stat-content">
                     <h3>Total Packets</h3>
                     <p class="stat-value" id="total-packets">0</p>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">✅</div>
                 <div class="stat-content">
                     <h3>Normal Traffic</h3>
                     <p class="stat-value" id="normal-traffic">0</p>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">🚨</div>
                 <div class="stat-content">
                     <h3>Attacks Detected</h3>
                     <p class="stat-value" id="attacks-detected">0</p>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">📈</div>
                 <div class="stat-content">
                     <h3>Attack Rate</h3>
                     <p class="stat-value" id="attack-rate">0%</p>

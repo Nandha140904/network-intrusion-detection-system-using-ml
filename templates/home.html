@@ -63,15 +63,45 @@
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            animation: fadeInDown 0.6s ease both;
         }
 
         .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-size: 1.4rem;
             font-weight: 800;
             background: var(--grad1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .nav-logo img {
+            height: 65px;
+            width: auto;
+            animation: logoFloat 3.5s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50%       { transform: translateY(-6px); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to   { opacity: 1; transform: translateX(0); }
         }
 
         .nav-links {
@@ -258,6 +288,7 @@
             flex-wrap: wrap;
             padding: 40px 40px 60px;
             border-top: 1px solid var(--border);
+            animation: fadeInUp 0.8s 0.4s ease both;
         }
 
         .stat-item {
@@ -329,7 +360,13 @@
             transition: all 0.4s;
             position: relative;
             overflow: hidden;
+            animation: fadeInUp 0.7s ease both;
         }
+        
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.2s; }
+        .feature-card:nth-child(3) { animation-delay: 0.3s; }
+        .feature-card:nth-child(4) { animation-delay: 0.4s; }
 
         .feature-card::before {
             content: '';
@@ -631,7 +668,9 @@
 
     <!-- Nav -->
     <nav>
-        <div class="nav-logo">🛡️ NIDS</div>
+        <div class="nav-logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="NIDS Logo">
+        </div>
         <ul class="nav-links">
             <li><a href="#features">Features</a></li>
             <li><a href="#about">About</a></li>
@@ -647,17 +686,17 @@
 
     <!-- Hero -->
     <section class="hero">
-        <div class="hero-badge">🟢 Real-time ML Detection Active</div>
+        <div class="hero-badge">Real-time ML Detection Active</div>
         <h1>Detect Cyber Attacks<br>with <span>Machine Learning</span></h1>
         <p>An intelligent, real-time Network Intrusion Detection System powered by Random Forest and XGBoost —
             classifying malicious traffic with high accuracy.</p>
         <div class="hero-actions">
             {% if session.logged_in %}
-            <a href="/dashboard" class="btn-primary">⚡ Go to Dashboard</a>
-            <a href="#about" class="btn-outline">📖 Learn More</a>
+            <a href="/dashboard" class="btn-primary">Go to Dashboard</a>
+            <a href="#about" class="btn-outline">Learn More</a>
             {% else %}
-            <a href="/login" class="btn-primary">🔐 Login to Dashboard →</a>
-            <a href="#about" class="btn-outline">📖 Learn More</a>
+            <a href="/login" class="btn-primary">Login to Dashboard →</a>
+            <a href="#about" class="btn-outline">Learn More</a>
             {% endif %}
         </div>
     </section>
@@ -690,37 +729,31 @@
         </p>
         <div class="features-grid">
             <div class="feature-card">
-                <div class="feature-icon">🤖</div>
                 <h3>ML-Powered Classification</h3>
                 <p>Random Forest and XGBoost ensemble models trained on the NSL-KDD dataset achieve near-perfect
                     accuracy in classifying normal vs. malicious traffic.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">⚡</div>
                 <h3>Real-time Packet Capture</h3>
                 <p>Scapy-based packet sniffer captures and processes live network traffic, extracting 41 flow-level
                     features for instant classification.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🚨</div>
                 <h3>Instant Alert System</h3>
                 <p>WebSocket-powered alerts are pushed to the dashboard the moment an attack is detected, with severity
                     ratings (HIGH/MEDIUM) and full network metadata.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📊</div>
                 <h3>Live Dashboard</h3>
                 <p>An interactive Chart.js dashboard displays traffic classification charts, attack distribution, known
                     hosts table, and a live traffic feed.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🌐</div>
                 <h3>Remote Accessible</h3>
                 <p>Runs on all network interfaces, making it accessible from any device on the local network for
                     centralized monitoring and management.</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🔍</div>
                 <h3>Host Tracking</h3>
                 <p>Automatically tracks and profiles all network hosts, flagging suspicious and malicious IPs with
                     historical packet counts and alert records.</p>
@@ -758,28 +791,28 @@
                 </ul>
             </div>
             <div class="tech-stack">
-                <h3>🛠 Technology Stack</h3>
+                <h3>Technology Stack</h3>
                 <div class="tech-pills" style="margin-bottom:24px">
                     <span class="pill pill-blue">Python 3.10+</span>
                     <span class="pill pill-blue">Flask</span>
                     <span class="pill pill-blue">Flask-SocketIO</span>
                     <span class="pill pill-blue">Scapy</span>
                 </div>
-                <h3 style="margin-bottom:14px">🤖 Machine Learning</h3>
+                <h3 style="margin-bottom:14px">Machine Learning</h3>
                 <div class="tech-pills" style="margin-bottom:24px">
                     <span class="pill pill-purple">scikit-learn</span>
                     <span class="pill pill-purple">XGBoost</span>
                     <span class="pill pill-purple">LightGBM</span>
                     <span class="pill pill-purple">imbalanced-learn</span>
                 </div>
-                <h3 style="margin-bottom:14px">📊 Data & Visualization</h3>
+                <h3 style="margin-bottom:14px">Data &amp; Visualization</h3>
                 <div class="tech-pills" style="margin-bottom:24px">
                     <span class="pill pill-green">NumPy</span>
                     <span class="pill pill-green">Pandas</span>
                     <span class="pill pill-green">Chart.js</span>
                     <span class="pill pill-green">Matplotlib</span>
                 </div>
-                <h3 style="margin-bottom:14px">🗄 Dataset</h3>
+                <h3 style="margin-bottom:14px">Dataset</h3>
                 <div class="tech-pills">
                     <span class="pill pill-orange">NSL-KDD</span>
                     <span class="pill pill-orange">41 Features</span>
@@ -796,27 +829,22 @@
         <p class="section-sub">Trained on the NSL-KDD benchmark, our model detects all major intrusion categories.</p>
         <div class="attacks-grid">
             <div class="attack-card">
-                <div class="icon">✅</div>
                 <h3>Normal Traffic</h3>
                 <p>Legitimate network flows classified and passed through without alerts.</p>
             </div>
             <div class="attack-card">
-                <div class="icon">💥</div>
                 <h3>DoS</h3>
                 <p>Denial of Service attacks that flood network resources to block legitimate users.</p>
             </div>
             <div class="attack-card">
-                <div class="icon">🔭</div>
                 <h3>Probe</h3>
                 <p>Port scanning and network probing by attackers gathering reconnaissance data.</p>
             </div>
             <div class="attack-card">
-                <div class="icon">🌍</div>
                 <h3>R2L</h3>
                 <p>Remote-to-Local attacks exploiting vulnerabilities to gain unauthorized local access.</p>
             </div>
             <div class="attack-card">
-                <div class="icon">👑</div>
                 <h3>U2R</h3>
                 <p>User-to-Root privilege escalation attacks attempting to gain administrator control.</p>
             </div>
@@ -830,15 +858,15 @@
             <p>Login to access the live intrusion detection dashboard and start protecting your infrastructure today.
             </p>
             {% if session.logged_in %}
-            <a href="/dashboard" class="btn-primary">⚡ Open Dashboard</a>
+            <a href="/dashboard" class="btn-primary">Open Dashboard</a>
             {% else %}
-            <a href="/login" class="btn-primary">🔐 Login Now →</a>
+            <a href="/login" class="btn-primary">Login Now →</a>
             {% endif %}
         </div>
     </section>
 
     <footer>
-        <p>🛡️ Network Intrusion Detection System &nbsp;|&nbsp; ML-based Traffic Classification</p>
+        <p>Network Intrusion Detection System &nbsp;|&nbsp; ML-based Traffic Classification</p>
         <p style="margin-top:8px">Powered by Random Forest &amp; XGBoost &nbsp;|&nbsp; Real-time Packet Analysis</p>
     </footer>
 
