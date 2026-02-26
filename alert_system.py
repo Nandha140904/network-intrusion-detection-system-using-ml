@@ -110,6 +110,9 @@ class AlertSystem:
         except Exception as e:
             logger.error(f"Error logging alert: {e}")
     
+    # Rate limiting for alert sound to avoid thread spam during heavy attacks
+    _last_sound_time = 0
+
     def _print_alert(self, alert):
         """
         Print alert to console
@@ -127,6 +130,28 @@ class AlertSystem:
         print(f"Dest IP:      {alert['dest_ip']}")
         print(f"Protocol:     {alert['protocol']}")
         print("="*60 + "\n")
+        
+        # Play an audible alert sound in a separate thread to avoid blocking packet capture
+        import time
+        current_time = time.time()
+        
+        # Rate limit: only play sound max once every 3 seconds
+        if current_time - getattr(self.__class__, '_last_sound_time', 0) > 3.0:
+            self.__class__._last_sound_time = current_time
+            def play_sound():
+                try:
+                    import platform
+                    if platform.system() == 'Windows':
+                        import winsound
+                        # Play 3 quick alert beeps
+                        for _ in range(3):
+                            winsound.Beep(2500, 200)
+                            time.sleep(0.1)
+                except Exception as e:
+                    logger.error(f"Could not play alert sound: {e}")
+                    
+            import threading
+            threading.Thread(target=play_sound, daemon=True).start()
     
     def get_recent_alerts(self, count=None):
         """
