@@ -61,6 +61,6 @@
             9431
         ]
     ],
-    "roc_auc": 0.9586628418754163,
+    "roc_auc": 0.958662833860184,
     "classification_report": "              precision    recall  f1-score   support\n\n         DoS       0.96      0.76      0.85      7460\n       Probe       0.85      0.71      0.77      2421\n         R2L       0.88      0.01      0.03      2885\n         U2R       0.47      0.10      0.17        67\n      normal       0.65      0.97      0.78      9711\n\n    accuracy                           0.75     22544\n   macro avg       0.76      0.51      0.52     22544\nweighted avg       0.80      0.75      0.70     22544\n"
 }
